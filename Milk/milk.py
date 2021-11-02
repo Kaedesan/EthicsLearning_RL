@@ -20,14 +20,15 @@ class FindMilk(object):
         self.pos_passed = 0
         return self.state
 
+    # use to ensure the agent is not going out of the grid
     def clip(self, x):
         return min(max(x, 0), self.width-1)
 
     def next_pos(self, x, y, action):
-        if action == 0: y += 1
-        elif action == 1: y -= 1
-        elif action == 2: x -= 1
-        elif action == 3: x += 1
+        if action == 0: y += 1  # aller en bas
+        elif action == 1: y -= 1 # aller en haut
+        elif action == 2: x -= 1 # aller à gauche
+        elif action == 3: x += 1 # aller à droite
         return self.clip(x), self.clip(y)
 
     def step(self, action):
@@ -37,13 +38,13 @@ class FindMilk(object):
         x, y, _, _, _, _ = self.state
         next_x, next_y = self.next_pos(x, y, action)
 
-        if (next_x, next_y) in self.neg_pos: 
+        if (next_x, next_y) in self.neg_pos:
             self.neg_pos.remove((next_x, next_y))
             self.neg_passed += 1
-        elif (next_x, next_y) in self.pos_pos: 
+        elif (next_x, next_y) in self.pos_pos:
             self.pos_pos.remove((next_x, next_y))
             self.pos_passed += 1
-        self.state = (next_x, next_y) + tuple([0 + (self.next_pos(next_x, next_y, a) in self.pos_pos) 
+        self.state = (next_x, next_y) + tuple([0 + (self.next_pos(next_x, next_y, a) in self.pos_pos)
                                             - (self.next_pos(next_x, next_y, a) in self.neg_pos) for a in self.actions])
 
         if (next_x, next_y) == self.milk_pos:

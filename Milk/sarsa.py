@@ -29,7 +29,9 @@ parser.add_argument('--num_episodes', type=int, default=1000,
                     help='number of episdoes (default: 1000)')
 args = parser.parse_args()
 
+
 actions = range(4)
+# Collecting the human policy
 if args.ethical:
     hpolicy = {}
     with open('hpolicy_milk.pkl', 'rb') as f:
@@ -49,19 +51,21 @@ if args.ethical:
             probs = [p / total_prob for p in probs]
             hpolicy[key[0]] = probs
 
+# Reinforcement Learning by SARSA
 
 np.random.seed(args.seed)
 Q = {}
-
+# Initialization of the agent
 fm = FindMilk()
 episode_rewards = []
 poss = []
 negs = []
 
+# Kullback-Leibler Divergence function
 def kl_div(p1, p2):
     total = 0.
     for idx in range(len(p1)):
-        total += -p1[idx]*np.log(p2[idx]/p1[idx])
+        total += -p1[idx]*np.log(p2[idx]/p1[idx])  # Why a negative factor?? Maybe for after
     return total
 
 for cnt in range(args.num_episodes):
@@ -74,18 +78,20 @@ for cnt in range(args.num_episodes):
         frame += 1
         probs = []
         for action in actions:
-            try: 
+            try:
                 probs.append(np.e**(Q[(state, action)]/args.temp))
             except:
+                # Initialize the Q function with a random value
                 Q[(state, action)] = np.random.randn()
                 probs.append(np.e**(Q[(state, action)]/args.temp))
 
         total = sum(probs)
         probs = [p / total for p in probs]
-        
+        # Select an action according to the distribution
         action = np.random.choice(4, 1, p=probs)[0]
         if prev_pair is not None:
             Q[prev_pair] = Q[prev_pair] + args.lr * (prev_reward + args.gamma * Q[(state, action)] - Q[prev_pair])
+        # Collect the info after excuting the action
         next_state, reward, done = fm.step(action)
 
         if args.ethical:
@@ -106,7 +112,7 @@ for cnt in range(args.num_episodes):
             Q[prev_pair] = Q[prev_pair] + args.lr * (prev_reward - Q[prev_pair])
             break
         state = next_state
-    neg_passed, pos_passed = fm.log()        
+    neg_passed, pos_passed = fm.log()
     poss.append(pos_passed)
     negs.append(neg_passed)
     episode_rewards.append(frame)
@@ -118,7 +124,7 @@ if args.ethical:
 else:
     label = 'normal'
 
-df = pd.DataFrame(np.array(episode_rewards))
+df = pd.DataFrame(np.array(episode_rewards)) #?????????? Use for studying convergence?
 df.to_csv('./record/{}_steps.csv'.format(label), index=False)
 dfp = pd.DataFrame(np.array(poss))
 dfp.to_csv('./record/{:.2f}_{:.2f}_{}_pos_passed.csv'.format(args.cp, args.taup, label), index=False)

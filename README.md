@@ -1,14 +1,10 @@
-# A Low-Cost Ethics Shaping Approach for Designing Reinforcement Learning Agent (AAAI, 2018)
+# Ethical issues in Reinforcement learning (RL)
 
-We propose a low-cost, easily realizable strategy to equip a reinforcement learning (RL) agent the capability of behaving  ethically.  Our  model  allows  the  designers of RL agents to solely focus on the task to achieve, without having to worry about the implementation of multiple trivial ethical patterns to follow. Based on the assumption that the majority of human behavior, regardless which goals they are achieving, is ethical, our design integrates human policy with the RL policy to achieve the target objective with less chance of violating the ethical code that human beings normally obey.
-Please refer to the [paper](https://arxiv.org/pdf/1712.04172.pdf) for more details. If you find this work useful in your research, please cite:
+As part of my internship in Lip6, we worked on the extension of the code given by the [paper](https://arxiv.org/pdf/1712.04172.pdf). Read this paper for more details on the basic scenario, especially the driving one.
 
-    @article{wu2017low,
-        title={A Low-Cost Ethics Shaping Approach for Designing Reinforcement Learning Agents},
-        author={Wu, Yueh-Hua and Lin, Shou-De},
-        journal={arXiv preprint arXiv:1712.04172},
-        year={2017}
-    }
+They propose a low-cost strategy for giving the capability to an agent to behave ethically using RL. We used their work for extending it to multi-tasking scenario by mixing the objective (avoiding cats and saving elder people) and by adding new objectives (avoiding ambulances).
+
+We treated these issues by single and multi-objectives resolutions.
 
 ## Requirements
 Packages used:
@@ -18,58 +14,40 @@ Packages used:
 Python version: *3.5.2* or later
 
 ## Usage
-For detailed settings of the experiments, please refer to the **Experiments** section in the [paper](https://arxiv.org/pdf/1712.04172.pdf). 
+For detailed settings of the experiments, please refer to the **Experiments** section in the [paper](https://arxiv.org/pdf/1712.04172.pdf).
 Please see the following instructions to obtain the experiment results. The results will be saved in the **record** folder.
-### Grab a Milk
-To see the performance without human trajectories,
-```Shell
-cd ./Milk/ 
-python sarsa.py
-```
 
-To see the performance with human trajectories, please make sure **hpolicy_milk.pkl** file exists. If not, generate the human trajectories by
-```Shell
-python human_policy.py 
-python sarsa.py --ethical
-```
 
 ### Driving
-There are two experiments called **Driving and Avoiding** and **Driving and Rescuing**. In both cases, there are cars and cats in five lanes. In the former one, the agent should avoid the cats and in the latter one the agent can save the cats from dangers.
+There are two experiments called **Driving and Avoiding and Rescuing** and **Driving and Avoiding and Rescuing and Split**. In both cases, there are cars and cats in five lanes. But in the second one, we had ambulances in the traffic. The agent should avoid the cats and save the elder people from dangers. The second experiment add the avoidance of ambulance, that can be treated as a rule to follow or as an additional objective.
 
-To see the performance without human trajectories,
+The basic agent is supposed to only treat cars avoidance and driving straight.
+
+To see the performance without human trajectories, the basic agent
 ```Shell
-cd ./Drive/ 
+cd ./Drive/
 python sarsa.py
 ```
+We present
 
-For **Driving and Avoiding**, to see the performance with human trajectories, please make sure **hpolicy_drive_n.pkl** exists. If not, generate the human trajectories by
+For **Driving and Avoiding and Rescuing**, to see the performance with human trajectories, please make sure **0_hpolicy_drive_human_m_mix.pkl** exists. If not, generate the human trajectories by
 ```Shell
-python hsarsa_n.py
-python sarsa.py --n_ethical
+python hsarsa_mix.py --m_ethical --id 0 --num_episodes 4000
+python sarsa_mix.py --m_ethical --id 0  --num_episodes 4000 --taun 0.20 --taup 0.50
 ```
 
-Similarly, for **Driving and Rescuing**, please check the existence of the **hpolicy_drive_p.pkl** file and use
+Similarly, for **Driving and Avoiding and Rescuing and Split**, please check the existence of the **0_hpolicy_drive_human_m_mix_split.pkll** file and use for the rule-cased ambulance avoidance
 ```Shell
-python hsarsa_p.py
-python sarsa.py --p_ethical
+python hsarsa_mix_plit.py --m_ethical --id 0 --num_episodes 4000
+python sarsa_mix_split.py --m_ethical --rule_ambulance --id 0  --num_episodes 4000 --taun 0.20 --taup 0.50
 ```
+The file sarsa_mix_split_mo.py can be used the same way for resolving this scenarioby a multi-objectives Approach, but need further improvements.
 
+You can find bash file for running several experiments and other ones for printing the performance for analysis.
 
 ## Results
-### Grab a Milk
-![steps.png](./images/steps.png)
-![neg_passed](./images/neg_passed.png)
-![pos_passed](./images/pos_passed.png)
 
-In the figures, *neg_passed* suggests the number of babies getting annoyed; therefore, the lower the better. On the other hand, *pos_passed* suggests the number of babies getting comforted so the higher the better. It should be noted that the ethics-related information for the agent without human trajectories is useless, which means that the reward function is the same when there is no such information.
-
-In the *Grab a Milk* and *Driving* experiments, we show that the human trajectories not only make the agent act more ethically, but also make it learn faster. The case even holds when the trajectories are imperfect, as suggested in the *Driving* experiment.
 
 ### Driving
-![performance.png](./images/performance.png)
-![car_accidient.png](./images/car_accident.png)
-![cat_hit.png](./images/cat_hit.png)
 
-Since the environment is much more complicated than the *Grab a Milk*, we generate human trajectories by SARSA with a different reward function. We intentionally weaken the driving skills of the human agent slightly so as to demonstrate that our agent is able to learn from imperfect data. 
-
-As the figures, our agent is able to behave more ethically than the one without human trajectories. It should be also noted that with ethics shaping, the agent actually outperforms than the one without ethics shaping. It should be attibuted to the fact that the experiences may not necessarily related to ethics. It can also be beneficial to the learning process. 
+All the results are summed up in the report given with the code. Many parameters are taking in consideration and explained in it.
